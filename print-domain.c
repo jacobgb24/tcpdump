@@ -287,9 +287,17 @@ print_eopt_ecs(netdissect_options *ndo, const u_char *cp,
     cp += 1;
 
     if (family == 1) {
+		if (src_len > 32 || scope_len > 32) {
+			nd_print_invalid(ndo);
+			return;
+		}
         addr_len = INET_ADDRSTRLEN;
         addr_bytes = 4;
     } else if (family == 2) {
+		if (src_len > 128 || scope_len > 128) {
+			nd_print_invalid(ndo);
+			return;
+		}
         addr_len = INET6_ADDRSTRLEN;
         addr_bytes = 16;
     } else {
@@ -300,6 +308,11 @@ print_eopt_ecs(netdissect_options *ndo, const u_char *cp,
     if (datalen - 4 > addr_bytes) {
         nd_print_invalid(ndo);
         return;
+    }
+
+    if (src_len / 8 != addr_len) {
+	    nd_print_invalid(ndo);
+	    return;
     }
 
     /* pad the truncated address from ecs with zeros */
